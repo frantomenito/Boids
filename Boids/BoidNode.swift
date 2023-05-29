@@ -7,32 +7,15 @@
 
 import SpriteKit
 
+
 class BoidNode: SKSpriteNode {
     
     private var currentSearchRadius: CGFloat = 0
     private var currentNeighbours: [BoidNode] = []
-    
-    var minimalDetectionRange: CGFloat = 25
-    
+        
     let minimalNeighboursCountToStopIncreasingRange = 5
     
-    
-    var maxSpeed: CGFloat = 600
-    var minSpeed: CGFloat = 500
-    var maxForce: CGFloat = 100
-    var randomness: CGFloat = 25
-    var passiveAcceleration: CGFloat = 1.1
-    
-    var separationDistance: CGFloat = 40
-
-    
-    var cohesionModifier: CGFloat = 0.1
-    var separationModifier: CGFloat = 0.5
-    var alignmentModifier: CGFloat = 0.2
-        
-    
-    init(size: CGSize) {
-        let texture = SKTexture(image: UIImage(named: "triangle")!)
+    init(size: CGSize, texture: SKTexture) {
         super.init(texture: texture, color: .red, size: size)
         
         //Physics
@@ -43,7 +26,6 @@ class BoidNode: SKSpriteNode {
         physicsBody?.categoryBitMask = 1
         physicsBody?.contactTestBitMask = 0
         physicsBody?.collisionBitMask = 2
-        //        node.physicsBody?.usesPreciseCollisionDetection = true
     }
     
     func getSearchRect() -> CGRect {
@@ -54,19 +36,23 @@ class BoidNode: SKSpriteNode {
                       height: currentSearchRadius * 2)
     }
     
-    func updateValues(neighbours: [BoidNode]) {
-        if neighbours.count < minimalNeighboursCountToStopIncreasingRange {
-            currentSearchRadius += 1.0 / CGFloat(minimalNeighboursCountToStopIncreasingRange - neighbours.count)
+    func setNeighbours(neighbours: [BoidNode]) {
+        currentNeighbours = neighbours
+    }
+    
+    func updateValues() {
+        if currentNeighbours.count < minimalNeighboursCountToStopIncreasingRange {
+            currentSearchRadius += 1.0 / CGFloat(minimalNeighboursCountToStopIncreasingRange - currentNeighbours.count)
         } else {
             currentSearchRadius = minimalDetectionRange
         }
-        
-        currentNeighbours = neighbours
         
         DispatchQueue.global().async {
             self.updateVelocity()
         }
     }
+    
+    
     
     //MARK: Rules
     //1-Cohesion: Steer towards average position of nearby boids
@@ -77,6 +63,7 @@ class BoidNode: SKSpriteNode {
         var flockPosition: CGPoint = .zero
         var separationVector: CGVector = .zero
         var alignmentVector: CGVector = .zero
+        
         var rulesSumVector: CGVector = .zero
         
         for neighbour in currentNeighbours {
@@ -84,7 +71,7 @@ class BoidNode: SKSpriteNode {
             alignmentVector += neighbour.physicsBody!.velocity
 
             //Separtion
-            if position.distance(point: neighbour.position) <= separationDistance {
+            if position.distance(to: neighbour.position) <= separationDistance {
                 var smallSeparationVector: CGVector = CGVector(dx: position.x - neighbour.position.x,
                                                                dy: position.y - neighbour.position.y)
                 let value = abs(smallSeparationVector.lenght - separationDistance)

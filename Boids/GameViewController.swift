@@ -24,10 +24,10 @@ class GameViewController: UIViewController {
                 view.presentScene(scene)
             }
             
-            view.ignoresSiblingOrder = true
-            
+            view.ignoresSiblingOrder = true //Imporves performance
+            view.shouldCullNonVisibleNodes = false
             view.showsFPS = true
-            view.showsNodeCount = true
+            view.showsNodeCount = false
         }
     }
 
