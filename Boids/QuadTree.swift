@@ -44,6 +44,28 @@ class QuadTree {
         }
     }
     
+    public func searchInSector(node: BoidNode) -> [BoidNode] {
+
+        let searchRect = node.getSearchRect()
+        
+
+        let initialNodeGroup = search(searchRect: searchRect)
+
+        var result = [BoidNode]()
+        result.reserveCapacity(initialNodeGroup.count)
+        
+        for maybeNode in initialNodeGroup { //Futher searching for nodes which are located in sector of main node's perceptionCircle            
+            let angle = atan2(maybeNode.position.y - node.position.y, maybeNode.position.x - node.position.x)
+        
+            let angleDifference = abs(-node.zRotation - angle)
+            
+            if angleDifference < visionAngle/2 {
+                result.append(maybeNode)
+            }
+        }
+        return result
+    }
+    
     func search(searchRect: CGRect) -> [BoidNode] {
         if !bounds.intersects(searchRect) { return [] }
         

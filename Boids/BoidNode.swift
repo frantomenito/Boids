@@ -8,12 +8,12 @@
 import SpriteKit
 
 
-class BoidNode: SKSpriteNode {
-    
-    private var currentSearchRadius: CGFloat = 0
+final class BoidNode: SKSpriteNode {
+    private var currentSearchRadius: CGFloat = 0 //Search radius is increasing until current amount of neighbours is the same as minimalNeighboursCountToStopIncreasingRange
     private var currentNeighbours: [BoidNode] = []
-        
-    let minimalNeighboursCountToStopIncreasingRange = 5
+    
+    private var neighboursAlignment: CGVector?
+    private var neighboursPosition: CGVector?
     
     init(size: CGSize, texture: SKTexture) {
         super.init(texture: texture, color: .red, size: size)
@@ -28,7 +28,7 @@ class BoidNode: SKSpriteNode {
         physicsBody?.collisionBitMask = 2
     }
     
-    func getSearchRect() -> CGRect {
+    public func getSearchRect() -> CGRect {
         currentSearchRadius = max(currentSearchRadius, minimalDetectionRange)
         return CGRect(x: position.x - currentSearchRadius,
                       y: position.y - currentSearchRadius,
@@ -36,95 +36,111 @@ class BoidNode: SKSpriteNode {
                       height: currentSearchRadius * 2)
     }
     
-    func setNeighbours(neighbours: [BoidNode]) {
+    public func setNeighbours(neighbours: [BoidNode]) {
         currentNeighbours = neighbours
+        updateNeighboursValues(neighbours: neighbours)
     }
     
-    func updateValues() {
-        if currentNeighbours.count < minimalNeighboursCountToStopIncreasingRange {
-            currentSearchRadius += 1.0 / CGFloat(minimalNeighboursCountToStopIncreasingRange - currentNeighbours.count)
-        } else {
-            currentSearchRadius = minimalDetectionRange
-        }
+    public func updateValues() {
+//        if currentNeighbours.count < minimalNeighboursCountToStopIncreasingRange {
+//            currentSearchRadius += 1.0 / CGFloat(minimalNeighboursCountToStopIncreasingRange - currentNeighbours.count)
+//        } else {
+//            currentSearchRadius = minimalDetectionRange
+//        }
         
         DispatchQueue.global().async {
             self.updateVelocity()
         }
     }
     
+    private func updateNeighboursValues(neighbours: [BoidNode]) {
+        if neighbours.isEmpty {
+            neighboursPosition = nil
+            neighboursAlignment = nil
+            return
+        } //If no neighbours, stops exectuing next funcs and sets neighbour values to nil, to stop calculating rules' values
+        
+        updateNeighboursAlignment()
+        updateNeighboursPosition()
+    }
     
-    
-    //MARK: Rules
-    //1-Cohesion: Steer towards average position of nearby boids
-    //2-Alignment: Mantain a heading similar to average flock heading
-    //3-Separtion: Keep distance between boids
-    
-    private func updateVelocity() {
-        var flockPosition: CGPoint = .zero
-        var separationVector: CGVector = .zero
+    private func updateNeighboursAlignment() {
         var alignmentVector: CGVector = .zero
         
-        var rulesSumVector: CGVector = .zero
+        for neighbour in currentNeighbours {
+            alignmentVector += neighbour.physicsBody!.velocity
+        }
+        
+        neighboursAlignment = alignmentVector / CGFloat(currentNeighbours.count)
+    }
+    
+    private func updateNeighboursPosition() {
+        var neighboursPosition: CGVector = .zero
         
         for neighbour in currentNeighbours {
-            //Alignment
-            alignmentVector += neighbour.physicsBody!.velocity
-
-            //Separtion
-            if position.distance(to: neighbour.position) <= separationDistance {
-                var smallSeparationVector: CGVector = CGVector(dx: position.x - neighbour.position.x,
-                                                               dy: position.y - neighbour.position.y)
-                let value = abs(smallSeparationVector.lenght - separationDistance)
-                smallSeparationVector = smallSeparationVector.normalized()*log10(value)*value
-                separationVector += smallSeparationVector
-            }
-            
-            //Cohesion
-            flockPosition += neighbour.position
+            neighboursPosition.dx += neighbour.position.x
+            neighboursPosition.dy += neighbour.position.y
         }
         
-        
-        if !currentNeighbours.isEmpty {
-            //Alignment
-            alignmentVector /= CGFloat(currentNeighbours.count)
-            alignmentVector -= physicsBody!.velocity
-            alignmentVector *= alignmentModifier
-            
-            //Separation
+        neighboursPosition = neighboursPosition / CGFloat(currentNeighbours.count)
+    }
+    
+    
 
-            separationVector -= physicsBody!.velocity
-            separationVector *= separationModifier
-            
-            
-            //Cohesion
-            
-            flockPosition /= CGFloat(currentNeighbours.count)
-            var cohesionVector = CGVector(dx: flockPosition.x - position.x,
-                                          dy: flockPosition.y - position.y)
-            
-            cohesionVector -= physicsBody!.velocity
-            cohesionVector *= cohesionModifier
-            
-            //Adding all vectors
-            rulesSumVector = separationVector + alignmentVector + cohesionVector
-        }
-        
-        rulesSumVector -= CGVector(randomIn: -randomness..<randomness)
-        rulesSumVector.limit(0...maxForce)
+    //MARK: Applying rules
+    private func updateVelocity() {
+        var sumVector: CGVector = .zero
 
-        var endingSteerVector: CGVector! = physicsBody!.velocity + rulesSumVector
+        //Rules
+        sumVector += alignmentRule()
+        sumVector += cohesionRule()
+        sumVector += separationRule()
+
+        //Randomness
+        var endingSteerVector: CGVector! = physicsBody!.velocity + sumVector * rotationModifier
         endingSteerVector.limit(minSpeed...maxSpeed)
 
         
-        //Randomness
-        endingSteerVector *= passiveAcceleration
         physicsBody!.velocity = endingSteerVector
-        
+                
         let steerAngle = atan2(1, 0) - atan2(endingSteerVector.dy,
                                              endingSteerVector.dx)
         
         //Rotation of the sprite
         zRotation = -steerAngle
+    }
+    
+    //MARK: Rules
+    //1-Cohesion: Steer towards average position of nearby boids
+    //2-Alignment: Mantain a heading similar to average flock heading
+    //3-Separtion: Keep distance between boids
+    private func alignmentRule() -> CGVector {
+        guard let _ = neighboursAlignment else { return .zero }
+
+        return (neighboursAlignment! - physicsBody!.velocity) * alignmentModifier
+    }
+    
+    private func cohesionRule() -> CGVector {
+        guard let _ = neighboursPosition else { return .zero }
+
+        return (neighboursPosition! - CGVector(dx: position.x, dy: position.y)) * cohesionModifier
+    }
+    
+    private func separationRule() -> CGVector {
+        if currentNeighbours.isEmpty { return .zero }
+        
+        var separationVector: CGVector = .zero
+        
+        for neighbour in currentNeighbours {
+            let distance = neighbour.position.distance(to: position)
+            if distance < separationDistance {
+                let escapeVector = position - neighbour.position
+                separationVector -= escapeVector * (100/distance)
+                
+            }
+        }
+        
+        return separationVector * separationModifier
     }
     
     required init?(coder aDecoder: NSCoder) {

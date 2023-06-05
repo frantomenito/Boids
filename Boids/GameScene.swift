@@ -24,16 +24,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     //MARK: - DidMove
     override func didMove(to view: SKView) {
-        
-        let scalingTransformation = CGAffineTransform(scaleX: 1, y: 0.5)
+        let rotationTransformation = CGAffineTransform(rotationAngle: CGFloat(90).rad())
         
         borderFrame = frame
-            .applying(scalingTransformation)
+            .applying(rotationTransformation)
             .offsetBy(dx: nodeSide*4, dy: nodeSide*4)
             .insetBy(dx: -nodeSide*8, dy: -nodeSide*8)
         
         previousNodeTree = QuadTree(bounds: frame, subdivideTreshold: treeSubdivisionTreshold, minSubdivisionLenght: minimalDetectionRange)
         currentNodeTree = QuadTree(bounds: frame, subdivideTreshold: treeSubdivisionTreshold, minSubdivisionLenght: minimalDetectionRange)
+        
         
         //DEBUG-PART
         if zoomOut {
@@ -45,6 +45,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         //DEBUG-PART
 
+        
         //Physics of the world
         physicsWorld.contactDelegate = self
         
@@ -54,10 +55,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         physicsBody?.collisionBitMask = 2
         physicsBody?.categoryBitMask = 0
         
-        
+        view.isPaused = true
         for _ in 0..<nodeCount {
             addNode()
         }
+        view.isPaused = false
+
         
         //DEBUG-PART
         if pauseOnStart {
@@ -68,6 +71,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         //DEBUG-PART
 
+        
     }
     
     //MARK: - Node creation
@@ -81,52 +85,56 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let randomPosition = CGPoint(x: randomX, y: randomY)
         node.position = randomPosition
         
-        //Movement
-        let randomVelocityVector = CGVector(randomIn: minSpeed..<maxSpeed)
-        node.physicsBody?.applyForce(randomVelocityVector)
-        node.zRotation = -atan2(1, 0) + atan2(randomVelocityVector.dy,
-                                             randomVelocityVector.dx)
         
         //Adding to important stuff
         nodeArray.append(node)
         previousNodeTree.addNode(node: node)
         addChild(node)
+        
+        
+        //Movement
+        let randomVelocityVector = CGVector(randomIn: minSpeed..<maxSpeed)
+        node.physicsBody!.applyForce(randomVelocityVector)
+        node.zRotation = -atan2(1, 0) + atan2(randomVelocityVector.dy,
+                                             randomVelocityVector.dx)
+                
+
     }
     
     //MARK: - Contact
-    func didBegin(_ contact: SKPhysicsContact) {
-        var node: SKNode!
-                
-        if contact.bodyA.categoryBitMask == 0 && contact.bodyB.categoryBitMask == 1 ||
-            contact.bodyA.categoryBitMask == 1 && contact.bodyB.categoryBitMask == 0 {
-            node = contact.bodyA.categoryBitMask == 1 ? contact.bodyA.node : contact.bodyB.node
-            
-            let x = node.position.x
-            let y = node.position.y
-                                        
-            let maxTresholdX = borderFrame.maxX - nodeSide * 4
-            let minTresholdX = borderFrame.minX + nodeSide * 4
-            let maxTresholdY = borderFrame.maxY - nodeSide * 4
-            let minTresholdY = borderFrame.minY + nodeSide * 4
-            
-            var movePoint = node.position
-
-            if x > maxTresholdX {
-                movePoint.x = minTresholdX
-            }
-            if x < minTresholdX {
-                movePoint.x = maxTresholdX
-            }
-            if y > maxTresholdX {
-                movePoint.y = minTresholdY
-            }
-            if y < minTresholdY {
-                movePoint.y = maxTresholdY
-            }
-            
-            node.move(toPoint: movePoint)
-        }
-    }
+//    func didBegin(_ contact: SKPhysicsContact) {
+//        var node: SKNode!
+//
+//        if contact.bodyA.categoryBitMask == 0 && contact.bodyB.categoryBitMask == 1 ||
+//            contact.bodyA.categoryBitMask == 1 && contact.bodyB.categoryBitMask == 0 {
+//            node = contact.bodyA.categoryBitMask == 1 ? contact.bodyA.node : contact.bodyB.node
+//
+//            let x = node.position.x
+//            let y = node.position.y
+//
+//            let maxTresholdX = borderFrame.maxX - nodeSide * 4
+//            let minTresholdX = borderFrame.minX + nodeSide * 4
+//            let maxTresholdY = borderFrame.maxY - nodeSide * 4
+//            let minTresholdY = borderFrame.minY + nodeSide * 4
+//
+//            var movePoint = node.position
+//
+//            if x > maxTresholdX {
+//                movePoint.x = minTresholdX
+//            }
+//            if x < minTresholdX {
+//                movePoint.x = maxTresholdX
+//            }
+//            if y > maxTresholdX {
+//                movePoint.y = minTresholdY
+//            }
+//            if y < minTresholdY {
+//                movePoint.y = maxTresholdY
+//            }
+//
+//            node.move(toPoint: movePoint)
+//        }
+//    }
     
     func touchDown(atPoint pos : CGPoint) {
     }
@@ -155,9 +163,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         for t in touches { self.touchUp(atPoint: t.location(in: self)) }
     }
     
-    //MARK: - Updating / Rules
-    
-
+    //MARK: - Updating
     override func update(_ currentTime: TimeInterval) {
         updateCount += 1
         
@@ -165,24 +171,51 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             updateCount = 0
             
             currentNodeTree.clear()
-
+            
             for node in nodeArray {
+                checkIfInsideOfView(node: node)
+                
                 self.currentNodeTree.addNode(node: node)
-
-                let searchRect = node.getSearchRect()
-                let neighbours = self.previousNodeTree.search(searchRect: searchRect)
+                let neighbours = self.previousNodeTree.searchInSector(node: node)
+                //                let searchRect = node.getSearchRect()
+                //                let neighbours = self.previousNodeTree.search(searchRect: searchRect)
+                
                 node.setNeighbours(neighbours: neighbours) //All rules logic is inside of BoidNode class
                 node.updateValues()
             }
             previousNodeTree = currentNodeTree
-
+            
         } else {
             for node in nodeArray {
-                let searchRect = node.getSearchRect()
-                let neighbours = self.previousNodeTree.search(searchRect: searchRect)
-                
                 node.updateValues()
             }
         }
+    }
+    
+    private func checkIfInsideOfView(node: BoidNode) {
+        let x = node.position.x
+        let y = node.position.y
+        
+        let maxTresholdX = borderFrame.maxX - nodeSide * 4
+        let minTresholdX = borderFrame.minX + nodeSide * 4
+        let maxTresholdY = borderFrame.maxY - nodeSide * 4
+        let minTresholdY = borderFrame.minY + nodeSide * 4
+        
+        var movePoint = node.position
+        
+        if x > maxTresholdX {
+            movePoint.x = minTresholdX
+        }
+        if x < minTresholdX {
+            movePoint.x = maxTresholdX
+        }
+        if y > maxTresholdX {
+            movePoint.y = minTresholdY
+        }
+        if y < minTresholdY {
+            movePoint.y = maxTresholdY
+        }
+        
+        node.move(toPoint: movePoint)
     }
 }
