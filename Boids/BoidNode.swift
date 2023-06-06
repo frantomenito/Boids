@@ -15,6 +15,8 @@ final class BoidNode: SKSpriteNode {
     private var neighboursAlignment: CGVector?
     private var neighboursPosition: CGVector?
     
+    
+    
     init(size: CGSize, texture: SKTexture) {
         super.init(texture: texture, color: .red, size: size)
         
@@ -24,7 +26,6 @@ final class BoidNode: SKSpriteNode {
         physicsBody?.affectedByGravity = false
         physicsBody?.linearDamping = 0
         physicsBody?.categoryBitMask = 1
-        physicsBody?.contactTestBitMask = 0
         physicsBody?.collisionBitMask = 2
     }
     

@@ -11,6 +11,8 @@ class QuadTree {
     var bounds: CGRect!
     var subdivideTreshold: Int!
     var minSubdivisionLenght: CGFloat!
+
+    private var displayNode: SKShapeNode?
     
     var nodes: [BoidNode] = []
     
@@ -30,7 +32,7 @@ class QuadTree {
     func addNode(node: BoidNode) {
         guard case bounds.contains(node.position) = true else { return }
         
-        if nodes.count < subdivideTreshold && minSubdivisionLenght <= min(bounds.width, bounds.height){
+        if nodes.count < subdivideTreshold || minSubdivisionLenght >= min(bounds.width, bounds.height){
             nodes.append(node)
         } else {
             if topRight == nil {
@@ -45,8 +47,7 @@ class QuadTree {
     }
     
     public func searchInSector(node: BoidNode) -> [BoidNode] {
-
-        let searchRect = node.getSearchRect()
+        let searchRect = node.getSearchRect() //Initial check for close nodes
         
 
         let initialNodeGroup = search(searchRect: searchRect)
@@ -54,7 +55,7 @@ class QuadTree {
         var result = [BoidNode]()
         result.reserveCapacity(initialNodeGroup.count)
         
-        for maybeNode in initialNodeGroup { //Futher searching for nodes which are located in sector of main node's perceptionCircle            
+        for maybeNode in initialNodeGroup { //Futher searching for nodes which are located in front sector of main node's perception circle         
             let angle = atan2(maybeNode.position.y - node.position.y, maybeNode.position.x - node.position.x)
         
             let angleDifference = abs(-node.zRotation - angle)
@@ -92,6 +93,9 @@ class QuadTree {
     func clear() {
         nodes = []
         
+        displayNode?.removeFromParent()
+        displayNode = nil
+        
         topRight = nil
         bottomLeft = nil
         bottomRight = nil
@@ -108,5 +112,25 @@ class QuadTree {
         bottomRight = QuadTree(bounds: bottomRightRect, subdivideTreshold: subdivideTreshold, minSubdivisionLenght: minSubdivisionLenght)
         bottomLeft = QuadTree(bounds: bottomLeftRect, subdivideTreshold: subdivideTreshold, minSubdivisionLenght: minSubdivisionLenght)
         topLeft = QuadTree(bounds: topLeftRect, subdivideTreshold: subdivideTreshold, minSubdivisionLenght: minSubdivisionLenght)
+    }
+    
+    public func draw(in scene: SKScene) {
+        let path = CGMutablePath()
+        path.addRect(bounds)
+        let shapeNode = SKShapeNode(path: path)
+        shapeNode.strokeColor = .white
+        scene.addChild(shapeNode)
+        displayNode = shapeNode
+        
+        if topRight != nil {
+            topRight!.draw(in: scene)
+            bottomRight!.draw(in: scene)
+            bottomLeft!.draw(in: scene)
+            topLeft!.draw(in: scene)
+        }
+    }
+    
+    deinit {
+        clear()
     }
 }

@@ -28,32 +28,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         borderFrame = frame
             .applying(rotationTransformation)
-            .offsetBy(dx: nodeSide*4, dy: nodeSide*4)
-            .insetBy(dx: -nodeSide*8, dy: -nodeSide*8)
-        
-        previousNodeTree = QuadTree(bounds: frame, subdivideTreshold: treeSubdivisionTreshold, minSubdivisionLenght: minimalDetectionRange)
-        currentNodeTree = QuadTree(bounds: frame, subdivideTreshold: treeSubdivisionTreshold, minSubdivisionLenght: minimalDetectionRange)
-        
-        
-        //DEBUG-PART
-        if zoomOut {
-            let cameraNode = SKCameraNode()
-            cameraNode.position = CGPoint(x: 0, y: 150)
-            addChild(cameraNode)
-            camera = cameraNode
-            camera?.setScale(3)
-        }
-        //DEBUG-PART
 
         
-        //Physics of the world
-        physicsWorld.contactDelegate = self
+        previousNodeTree = QuadTree(bounds: borderFrame, subdivideTreshold: treeSubdivisionTreshold, minSubdivisionLenght: minimalDetectionRange)
+        currentNodeTree = QuadTree(bounds: borderFrame, subdivideTreshold: treeSubdivisionTreshold, minSubdivisionLenght: minimalDetectionRange)
         
-        physicsBody = SKPhysicsBody(edgeLoopFrom: borderFrame)
+        //camera
+        let cameraNode = SKCameraNode()
+        cameraNode.position = CGPoint(x: 0, y: 0)
+        addChild(cameraNode)
+        camera = cameraNode
         
-        physicsBody?.contactTestBitMask = 1
-        physicsBody?.collisionBitMask = 2
-        physicsBody?.categoryBitMask = 0
+        //DEBUG
+        if zoomOut {
+            camera?.setScale(3)
+        }
         
         view.isPaused = true
         for _ in 0..<nodeCount {
@@ -101,41 +90,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
     }
     
-    //MARK: - Contact
-//    func didBegin(_ contact: SKPhysicsContact) {
-//        var node: SKNode!
-//
-//        if contact.bodyA.categoryBitMask == 0 && contact.bodyB.categoryBitMask == 1 ||
-//            contact.bodyA.categoryBitMask == 1 && contact.bodyB.categoryBitMask == 0 {
-//            node = contact.bodyA.categoryBitMask == 1 ? contact.bodyA.node : contact.bodyB.node
-//
-//            let x = node.position.x
-//            let y = node.position.y
-//
-//            let maxTresholdX = borderFrame.maxX - nodeSide * 4
-//            let minTresholdX = borderFrame.minX + nodeSide * 4
-//            let maxTresholdY = borderFrame.maxY - nodeSide * 4
-//            let minTresholdY = borderFrame.minY + nodeSide * 4
-//
-//            var movePoint = node.position
-//
-//            if x > maxTresholdX {
-//                movePoint.x = minTresholdX
-//            }
-//            if x < minTresholdX {
-//                movePoint.x = maxTresholdX
-//            }
-//            if y > maxTresholdX {
-//                movePoint.y = minTresholdY
-//            }
-//            if y < minTresholdY {
-//                movePoint.y = maxTresholdY
-//            }
-//
-//            node.move(toPoint: movePoint)
-//        }
-//    }
-    
     func touchDown(atPoint pos : CGPoint) {
     }
     
@@ -144,7 +98,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func touchUp(atPoint pos : CGPoint) {
-   
+        print(pos)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -177,14 +131,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 
                 self.currentNodeTree.addNode(node: node)
                 let neighbours = self.previousNodeTree.searchInSector(node: node)
-                //                let searchRect = node.getSearchRect()
-                //                let neighbours = self.previousNodeTree.search(searchRect: searchRect)
+//                                let searchRect = node.getSearchRect()
+//                                let neighbours = self.previousNodeTree.search(searchRect: searchRect)
                 
                 node.setNeighbours(neighbours: neighbours) //All rules logic is inside of BoidNode class
                 node.updateValues()
             }
             previousNodeTree = currentNodeTree
             
+            //DEBUG
+            if showTree {
+                previousNodeTree.draw(in: self)
+            }
+            //DEBUG
         } else {
             for node in nodeArray {
                 node.updateValues()
@@ -196,10 +155,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let x = node.position.x
         let y = node.position.y
         
-        let maxTresholdX = borderFrame.maxX - nodeSide * 4
-        let minTresholdX = borderFrame.minX + nodeSide * 4
-        let maxTresholdY = borderFrame.maxY - nodeSide * 4
-        let minTresholdY = borderFrame.minY + nodeSide * 4
+        let maxTresholdX = borderFrame.maxX
+        let minTresholdX = borderFrame.minX
+        let maxTresholdY = borderFrame.maxY
+        let minTresholdY = borderFrame.minY
         
         var movePoint = node.position
         
@@ -209,7 +168,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if x < minTresholdX {
             movePoint.x = maxTresholdX
         }
-        if y > maxTresholdX {
+        if y > maxTresholdY {
             movePoint.y = minTresholdY
         }
         if y < minTresholdY {
