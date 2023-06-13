@@ -7,7 +7,7 @@
 
 import Foundation
 
-let nodeCount = 800
+let nodeCount = 500
 
 //Boid settings
 let maxSpeed: CGFloat = 300
@@ -33,7 +33,7 @@ let rotationModifier: CGFloat = 0.3  //Bigger - faster rotation. 0.3 works best 
 
 //World settings
 let borderMargin: CGFloat = 25
-let treeSubdivisionTreshold: Int = 10 // 20 for 1500 nodes
+let treeSubdivisionTreshold: Int = 20 // 20 for 1500 nodes
 
 let numberOfFramesBeforeUpdatingInfo: Int = 3//Every N frames tree and neighbours info will be recreated
 
@@ -41,4 +41,4 @@ let numberOfFramesBeforeUpdatingInfo: Int = 3//Every N frames tree and neighbour
 let debugMode = false
 let showTree = false
 let pauseOnStart = false
-let zoomOut = false
+let zoomOut = true

@@ -16,8 +16,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var nodeArray: [BoidNode] = []
     var updateCount: Int = 0
     
-    var previousNodeTree: QuadTree!
-    var currentNodeTree: QuadTree!
+    var previousNodeTree: SpatialHashGrid!
+    var currentNodeTree: SpatialHashGrid!
     
     let nodeTexture = SKTexture(image: UIImage(named: "triangle")!) //Using the same texture to reduce amount of draws. See https://developer.apple.com/documentation/spritekit/nodes_for_scene_building/maximizing_node_drawing_performance
 
@@ -30,8 +30,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             .applying(rotationTransformation)
 
         
-        previousNodeTree = QuadTree(bounds: borderFrame, subdivideTreshold: treeSubdivisionTreshold, minSubdivisionLenght: minimalDetectionRange)
-        currentNodeTree = QuadTree(bounds: borderFrame, subdivideTreshold: treeSubdivisionTreshold, minSubdivisionLenght: minimalDetectionRange)
+        previousNodeTree = SpatialHashGrid(cellSize: minimalDetectionRange)
+        currentNodeTree = SpatialHashGrid(cellSize: minimalDetectionRange)
         
         //camera
         let cameraNode = SKCameraNode()
@@ -130,7 +130,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 checkIfInsideOfView(node: node)
                 
                 self.currentNodeTree.addNode(node: node)
-                let neighbours = self.previousNodeTree.searchInSector(node: node)
+                let neighbours = self.previousNodeTree.searchNodesInRange(from: node.position, range: minimalDetectionRange)
 //                                let searchRect = node.getSearchRect()
 //                                let neighbours = self.previousNodeTree.search(searchRect: searchRect)
                 
@@ -141,7 +141,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             //DEBUG
             if showTree {
-                previousNodeTree.draw(in: self)
+//                previousNodeTree.draw(in: self)
             }
             //DEBUG
         } else {

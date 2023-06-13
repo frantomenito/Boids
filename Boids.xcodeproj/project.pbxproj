@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		141F07DD2A2FA566005F9C69 /* SpatialHashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141F07DC2A2FA566005F9C69 /* SpatialHashing.swift */; };
 		142E86A02A2526BD00C24D37 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142E869F2A2526BD00C24D37 /* Extensions.swift */; };
 		142E86A22A252BFE00C24D37 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142E86A12A252BFE00C24D37 /* Preferences.swift */; };
 		14912D9629B261B5003CFEA8 /* QuadTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14912D9529B261B5003CFEA8 /* QuadTree.swift */; };
@@ -21,6 +22,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		141F07DC2A2FA566005F9C69 /* SpatialHashing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpatialHashing.swift; sourceTree = "<group>"; };
 		142E869F2A2526BD00C24D37 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		142E86A12A252BFE00C24D37 /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		14912D9529B261B5003CFEA8 /* QuadTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuadTree.swift; sourceTree = "<group>"; };
@@ -73,6 +75,7 @@
 				142E869F2A2526BD00C24D37 /* Extensions.swift */,
 				14C0EA3729B50759007A0BEF /* BoidNode.swift */,
 				14C9653B299E86C6001802C7 /* GameScene.swift */,
+				141F07DC2A2FA566005F9C69 /* SpatialHashing.swift */,
 				14C9653F299E86C6001802C7 /* Main.storyboard */,
 				14C96542299E86C9001802C7 /* Assets.xcassets */,
 				14C96544299E86C9001802C7 /* LaunchScreen.storyboard */,
@@ -159,6 +162,7 @@
 				14912D9629B261B5003CFEA8 /* QuadTree.swift in Sources */,
 				14C9653E299E86C6001802C7 /* GameViewController.swift in Sources */,
 				14C96536299E86C6001802C7 /* AppDelegate.swift in Sources */,
+				141F07DD2A2FA566005F9C69 /* SpatialHashing.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
