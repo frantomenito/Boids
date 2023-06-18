@@ -7,7 +7,7 @@
 
 import Foundation
 
-let nodeCount = 500
+let nodeCount = 512
 
 //Boid settings
 let maxSpeed: CGFloat = 300
@@ -18,6 +18,9 @@ let passiveAcceleration: CGFloat = 1.1
 
 let nodeSide: CGFloat = 25
 let minimalDetectionRange: CGFloat = 100
+let minimalDetectionRangeSquared: CGFloat = {
+    return minimalDetectionRange * minimalDetectionRange
+}()
 
 let separationDistance: CGFloat = 35
 let randomness: CGFloat = 25
@@ -33,12 +36,12 @@ let rotationModifier: CGFloat = 0.3  //Bigger - faster rotation. 0.3 works best 
 
 //World settings
 let borderMargin: CGFloat = 25
-let treeSubdivisionTreshold: Int = 20 // 20 for 1500 nodes
+let treeSubdivisionTreshold: Int = 10 // 20 for 1500 nodes
 
 let numberOfFramesBeforeUpdatingInfo: Int = 3//Every N frames tree and neighbours info will be recreated
 
 //Debug
 let debugMode = false
-let showTree = false
+let showTree = true
 let pauseOnStart = false
 let zoomOut = true

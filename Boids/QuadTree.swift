@@ -67,6 +67,28 @@ class QuadTree {
         return result
     }
     
+    public func searchNodesInRange(from point: CGPoint, range: CGFloat) -> [BoidNode] {
+            var result: [BoidNode] = []
+            
+            // Check if the distance between the point and the bounds of the quadtree is within range
+            if point.distance(to: bounds.center) <= range + bounds.radius {
+                for node in nodes {
+                    // Check if the distance between the node and the point is within range
+                    if node.position.distance(to: point) <= range {
+                        result.append(node)
+                    }
+                }
+                
+                if topRight != nil {
+                    result.append(contentsOf: topRight!.searchNodesInRange(from: point, range: range))
+                    result.append(contentsOf: bottomRight!.searchNodesInRange(from: point, range: range))
+                    result.append(contentsOf: bottomLeft!.searchNodesInRange(from: point, range: range))
+                    result.append(contentsOf: topLeft!.searchNodesInRange(from: point, range: range))
+                }
+            }
+            return result
+        }
+    
     func search(searchRect: CGRect) -> [BoidNode] {
         if !bounds.intersects(searchRect) { return [] }
         

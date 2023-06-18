@@ -23,9 +23,8 @@ class SpatialHashGrid {
             grid[key] = []
         }
         grid[key]!.append(node)
-        
     }
-    
+
     func getNodesInCell(at position: CGPoint) -> [BoidNode] {
         let gridKey = getGridKey(for: position)
         return grid[gridKey] ?? []
@@ -38,20 +37,20 @@ class SpatialHashGrid {
     }
     
     func searchNodesInRange(from point: CGPoint, range: CGFloat) -> [BoidNode] {
-        let minX = Int((point.x - range) / cellSize)
-        let maxX = Int((point.x + range) / cellSize)
-        let minY = Int((point.y - range) / cellSize)
-        let maxY = Int((point.y + range) / cellSize)
+        let nodeGridKey = getGridKey(for: point)
         
         var nodesInRange = [BoidNode]()
         
-        for x in minX...maxX {
-            for y in minY...maxY {
+        for x in nodeGridKey.x-1...nodeGridKey.x+1 {
+            for y in nodeGridKey.y-1...nodeGridKey.y+1 {
                 let gridKey = GridKey(x: x, y: y)
                 if let nodes = grid[gridKey] {
                     for node in nodes {
-                        let distance = node.position.distance(to: point)
-                        if distance <= range && distance != 0 {
+                        let dx = node.position.x - point.x
+                        let dy = node.position.y - point.y
+                        let squaredDistance = dx * dx + dy * dy //Using squared distance, to remove division from calculation
+                        
+                        if squaredDistance <= minimalDetectionRangeSquared && squaredDistance != 0 {
                             nodesInRange.append(node)
                         }
                     }

@@ -19,6 +19,8 @@
 		14C96541299E86C6001802C7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 14C9653F299E86C6001802C7 /* Main.storyboard */; };
 		14C96543299E86C9001802C7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14C96542299E86C9001802C7 /* Assets.xcassets */; };
 		14C96546299E86C9001802C7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 14C96544299E86C9001802C7 /* LaunchScreen.storyboard */; };
+		14E1E9692A3F4FB400BDD531 /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 14E1E9682A3F4FB400BDD531 /* Algorithms */; };
+		14E1E96C2A3F65FD00BDD531 /* KDTree in Frameworks */ = {isa = PBXBuildFile; productRef = 14E1E96B2A3F65FD00BDD531 /* KDTree */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +44,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				14E1E9692A3F4FB400BDD531 /* Algorithms in Frameworks */,
+				14E1E96C2A3F65FD00BDD531 /* KDTree in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -99,6 +103,10 @@
 			dependencies = (
 			);
 			name = Boids;
+			packageProductDependencies = (
+				14E1E9682A3F4FB400BDD531 /* Algorithms */,
+				14E1E96B2A3F65FD00BDD531 /* KDTree */,
+			);
 			productName = Boids;
 			productReference = 14C96532299E86C6001802C7 /* Boids.app */;
 			productType = "com.apple.product-type.application";
@@ -127,6 +135,10 @@
 				Base,
 			);
 			mainGroup = 14C96529299E86C5001802C7;
+			packageReferences = (
+				14E1E9672A3F4FB400BDD531 /* XCRemoteSwiftPackageReference "swift-algorithms" */,
+				14E1E96A2A3F65FD00BDD531 /* XCRemoteSwiftPackageReference "KDTree" */,
+			);
 			productRefGroup = 14C96533299E86C6001802C7 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -380,6 +392,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		14E1E9672A3F4FB400BDD531 /* XCRemoteSwiftPackageReference "swift-algorithms" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-algorithms.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+		14E1E96A2A3F65FD00BDD531 /* XCRemoteSwiftPackageReference "KDTree" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Bersaelor/KDTree";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		14E1E9682A3F4FB400BDD531 /* Algorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 14E1E9672A3F4FB400BDD531 /* XCRemoteSwiftPackageReference "swift-algorithms" */;
+			productName = Algorithms;
+		};
+		14E1E96B2A3F65FD00BDD531 /* KDTree */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 14E1E96A2A3F65FD00BDD531 /* XCRemoteSwiftPackageReference "KDTree" */;
+			productName = KDTree;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 14C9652A299E86C6001802C7 /* Project object */;
 }

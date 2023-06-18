@@ -125,14 +125,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             updateCount = 0
             
             currentNodeTree.clear()
-            
+
             for node in nodeArray {
                 checkIfInsideOfView(node: node)
-                
                 self.currentNodeTree.addNode(node: node)
                 let neighbours = self.previousNodeTree.searchNodesInRange(from: node.position, range: minimalDetectionRange)
-//                                let searchRect = node.getSearchRect()
-//                                let neighbours = self.previousNodeTree.search(searchRect: searchRect)
                 
                 node.setNeighbours(neighbours: neighbours) //All rules logic is inside of BoidNode class
                 node.updateValues()
