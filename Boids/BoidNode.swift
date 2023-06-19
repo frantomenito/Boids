@@ -6,7 +6,7 @@
 //
 
 import SpriteKit
-
+import simd
 
 final class BoidNode: SKSpriteNode {
     private var currentSearchRadius: CGFloat = 0 //Search radius is increasing until current amount of neighbours is the same as minimalNeighboursCountToStopIncreasingRange
@@ -14,7 +14,6 @@ final class BoidNode: SKSpriteNode {
     
     private var neighboursAlignment: CGVector?
     private var neighboursPosition: CGVector?
-    
     
     
     init(size: CGSize, texture: SKTexture) {
@@ -42,54 +41,30 @@ final class BoidNode: SKSpriteNode {
         updateNeighboursValues(neighbours: neighbours)
     }
     
-    public func updateValues() {
-//        if currentNeighbours.count < minimalNeighboursCountToStopIncreasingRange {
-//            currentSearchRadius += 1.0 / CGFloat(minimalNeighboursCountToStopIncreasingRange - currentNeighbours.count)
-//        } else {
-//            currentSearchRadius = minimalDetectionRange
-//        }
-        
-        DispatchQueue.global().async {
-            self.updateVelocity()
-        }
-    }
-    
     private func updateNeighboursValues(neighbours: [BoidNode]) {
-        if neighbours.isEmpty {
+        guard neighbours.count > 1 else {
             neighboursPosition = nil
             neighboursAlignment = nil
             return
         } //If no neighbours, stops exectuing next funcs and sets neighbour values to nil, to stop calculating rules' values
         
-        updateNeighboursAlignment()
-        updateNeighboursPosition()
-    }
-    
-    private func updateNeighboursAlignment() {
         var alignmentVector: CGVector = .zero
-        
+        var neighboursPosition: CGVector = .zero
+
         for neighbour in currentNeighbours {
             alignmentVector += neighbour.physicsBody!.velocity
-        }
-        
-        neighboursAlignment = alignmentVector / CGFloat(currentNeighbours.count)
-    }
-    
-    private func updateNeighboursPosition() {
-        var neighboursPosition: CGVector = .zero
-        
-        for neighbour in currentNeighbours {
+            
             neighboursPosition.dx += neighbour.position.x
             neighboursPosition.dy += neighbour.position.y
         }
         
+        neighboursAlignment = alignmentVector / CGFloat(currentNeighbours.count)
         neighboursPosition = neighboursPosition / CGFloat(currentNeighbours.count)
+        
     }
-    
-    
 
     //MARK: Applying rules
-    private func updateVelocity() {
+    public func updateVelocity() {
         var sumVector: CGVector = .zero
 
         //Rules
@@ -134,10 +109,9 @@ final class BoidNode: SKSpriteNode {
         
         for neighbour in currentNeighbours {
             let distance = neighbour.position.distance(to: position)
-            if distance < separationDistance {
+            if distance < sqrt(separationDistanceSquared) {
                 let escapeVector = position - neighbour.position
                 separationVector -= escapeVector * (100/distance)
-                
             }
         }
         

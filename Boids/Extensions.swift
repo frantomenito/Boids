@@ -62,6 +62,10 @@ extension CGPoint {
         return CGPoint(x: point.x * rvalue,
                        y: point.y * rvalue)
     }
+    
+    var lengthSquared: CGFloat {
+        return x*x + y*y
+    }
 }
 
 extension CGVector {
@@ -97,6 +101,13 @@ extension CGVector {
                         dy: lvector.dy + rvector.dy)
         
     }
+    
+    static func +(vector: CGVector, point: CGPoint) -> CGVector {
+        return CGVector(dx: vector.dx + point.x,
+                        dy: vector.dy + point.y)
+        
+    }
+    
     static func -(lvector: CGVector, rvector: CGVector) -> CGVector {
         return CGVector(dx: lvector.dx - rvector.dx,
                         dy: lvector.dy - rvector.dy)
@@ -142,6 +153,10 @@ extension CGVector {
     
     var lenght: CGFloat {
         return sqrt(dx*dx + dy*dy)
+    }
+    
+    var lengthSquared: CGFloat {
+        return dx*dx + dy*dy
     }
     
     func normalized() -> CGVector {

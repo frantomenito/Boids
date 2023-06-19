@@ -6,7 +6,7 @@
 //
 
 import SpriteKit
-import GameplayKit
+import KDTree
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
@@ -23,13 +23,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
     
     //MARK: - DidMove
-    override func didMove(to view: SKView) {
-        let rotationTransformation = CGAffineTransform(rotationAngle: CGFloat(90).rad())
-        
+    override func didMove(to view: SKView) {        
         borderFrame = frame
-            .applying(rotationTransformation)
 
-        
         previousNodeTree = SpatialHashGrid(cellSize: minimalDetectionRange)
         currentNodeTree = SpatialHashGrid(cellSize: minimalDetectionRange)
         
@@ -41,7 +37,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         //DEBUG
         if zoomOut {
-            camera?.setScale(3)
+            camera?.setScale(1.5)
         }
         
         view.isPaused = true
@@ -68,8 +64,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let node = BoidNode(size: CGSize(width: nodeSide, height: nodeSide), texture: nodeTexture)
         
         //Location
-        let randomX = CGFloat.random(in: frame.minX + nodeSide * 2...frame.maxX - nodeSide * 2)
-        let randomY = CGFloat.random(in: frame.minY + nodeSide * 2...frame.maxY - nodeSide * 2)
+        let randomX = CGFloat.random(in: frame.minX...frame.maxX)
+        let randomY = CGFloat.random(in: frame.minY...frame.maxY)
         
         let randomPosition = CGPoint(x: randomX, y: randomY)
         node.position = randomPosition
@@ -129,10 +125,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             for node in nodeArray {
                 checkIfInsideOfView(node: node)
                 self.currentNodeTree.addNode(node: node)
-                let neighbours = self.previousNodeTree.searchNodesInRange(from: node.position, range: minimalDetectionRange)
+                let neighbours = self.previousNodeTree.searchNodesInRange(from: node.position,
+                                                                          range: minimalDetectionRange)
                 
                 node.setNeighbours(neighbours: neighbours) //All rules logic is inside of BoidNode class
-                node.updateValues()
+                node.updateVelocity()
             }
             previousNodeTree = currentNodeTree
             
@@ -143,7 +140,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             //DEBUG
         } else {
             for node in nodeArray {
-                node.updateValues()
+                node.updateVelocity()
             }
         }
     }
