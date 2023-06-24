@@ -6,13 +6,9 @@
 //
 
 import SpriteKit
-import KDTree
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
-    
-    
     //Global variables
-    var borderFrame: CGRect = .zero
     var nodeArray: [BoidNode] = []
     var updateCount: Int = 0
     
@@ -23,11 +19,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
     
     //MARK: - DidMove
-    override func didMove(to view: SKView) {        
-        borderFrame = frame
-
-        previousNodeTree = SpatialHashGrid(cellSize: minimalDetectionRange)
-        currentNodeTree = SpatialHashGrid(cellSize: minimalDetectionRange)
+    override func didMove(to view: SKView) {
+        previousNodeTree = SpatialHashGrid(cellSize: detectionRange)
+        currentNodeTree = SpatialHashGrid(cellSize: detectionRange)
         
         //camera
         let cameraNode = SKCameraNode()
@@ -35,11 +29,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(cameraNode)
         camera = cameraNode
         
-        //DEBUG
-        if zoomOut {
-            camera?.setScale(1.5)
-        }
-        
+        //Nodes creation
         view.isPaused = true
         for _ in 0..<nodeCount {
             addNode()
@@ -47,16 +37,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         view.isPaused = false
 
         
-        //DEBUG-PART
+        //DEBUG
+        if zoomOut {
+            camera?.setScale(1.5)
+        }
+        
         if pauseOnStart {
             view.isPaused = true
         }
-        if debugMode {
-            view.showsPhysics = true
-        }
-        //DEBUG-PART
-
         
+        if showSearchAlgorithm {
+            previousNodeTree.draw(in: self)
+        }
+        //DEBUG
     }
     
     //MARK: - Node creation
@@ -71,7 +64,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         node.position = randomPosition
         
         
-        //Adding to important stuff
+        //Adding to arrays
         nodeArray.append(node)
         previousNodeTree.addNode(node: node)
         addChild(node)
@@ -79,22 +72,37 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         //Movement
         let randomVelocityVector = CGVector(randomIn: minSpeed..<maxSpeed)
-        node.physicsBody!.applyForce(randomVelocityVector)
+        node.velocity = randomVelocityVector
         node.zRotation = -atan2(1, 0) + atan2(randomVelocityVector.dy,
                                              randomVelocityVector.dx)
-                
-
     }
     
     func touchDown(atPoint pos : CGPoint) {
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.prepare()
+        generator.impactOccurred()
+        
+        setNodesTouchLocation(touch: pos)
     }
     
     func touchMoved(toPoint pos : CGPoint) {
-       
+        setNodesTouchLocation(touch: pos)
     }
     
     func touchUp(atPoint pos : CGPoint) {
-        print(pos)
+        removeNodesTouchLocation()
+    }
+    
+    func setNodesTouchLocation(touch: CGPoint) {
+        for node in nodeArray {
+            node.setTouchLocation(touch: touch)
+        }
+    }
+    
+    func removeNodesTouchLocation() {
+        for node in nodeArray {
+            node.removeTouchLocation()
+        }
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -126,20 +134,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 checkIfInsideOfView(node: node)
                 self.currentNodeTree.addNode(node: node)
                 let neighbours = self.previousNodeTree.searchNodesInRange(from: node.position,
-                                                                          range: minimalDetectionRange)
+                                                                          range: detectionRange)
                 
                 node.setNeighbours(neighbours: neighbours) //All rules logic is inside of BoidNode class
+                
+                
+            }
+            
+            DispatchQueue.concurrentPerform(iterations: nodeArray.count) { i in
+                let node = nodeArray[i]
+                
                 node.updateVelocity()
             }
-            previousNodeTree = currentNodeTree
             
-            //DEBUG
-            if showTree {
-//                previousNodeTree.draw(in: self)
-            }
-            //DEBUG
+            previousNodeTree = currentNodeTree
         } else {
-            for node in nodeArray {
+            DispatchQueue.concurrentPerform(iterations: nodeArray.count) { i in
+                let node = nodeArray[i]
+                
                 node.updateVelocity()
             }
         }
@@ -149,26 +161,26 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let x = node.position.x
         let y = node.position.y
         
-        let maxTresholdX = borderFrame.maxX
-        let minTresholdX = borderFrame.minX
-        let maxTresholdY = borderFrame.maxY
-        let minTresholdY = borderFrame.minY
+        let maxTresholdX = frame.maxX
+        let minTresholdX = frame.minX
+        let maxTresholdY = frame.maxY
+        let minTresholdY = frame.minY
         
         var movePoint = node.position
         
         if x > maxTresholdX {
-            movePoint.x = minTresholdX
+            movePoint.x -= frame.width
         }
         if x < minTresholdX {
-            movePoint.x = maxTresholdX
+            movePoint.x += frame.width
         }
         if y > maxTresholdY {
-            movePoint.y = minTresholdY
+            movePoint.y -= frame.height
         }
         if y < minTresholdY {
-            movePoint.y = maxTresholdY
+            movePoint.y += frame.height
         }
         
-        node.move(toPoint: movePoint)
+        node.position = movePoint
     }
 }

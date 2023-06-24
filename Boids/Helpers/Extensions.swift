@@ -43,6 +43,11 @@ extension CGPoint {
     func distance(to: CGPoint) -> CGFloat {
         return CGFloat(hypotf(Float(to.x - self.x), Float(to.y - self.y)))
     }
+    func squaredDistance(to point: CGPoint) -> CGFloat {
+        let dx = point.x - x
+        let dy = point.y - y
+        return dx*dx + dy*dy
+    }
     
     static func /=(point: inout CGPoint, value: CGFloat) {
         point.x /= value
@@ -66,6 +71,11 @@ extension CGPoint {
     var lengthSquared: CGFloat {
         return x*x + y*y
     }
+    
+    var toVector: CGVector {
+        return CGVector(dx: x, dy: y)
+    }
+    
 }
 
 extension CGVector {
@@ -177,6 +187,10 @@ extension CGVector {
             self = normalized() * force
         }
     }
+    
+    var toPoint: CGPoint {
+        return CGPoint(x: dx, y: dy)
+    }
 }
 
 extension CGFloat {
@@ -218,24 +232,3 @@ extension SKNode {
     }
 }
 
-extension SKScene {
-    func nodesInRange(point: CGPoint, range: CGFloat) -> [SKNode] {
-        return self
-            .children
-            .filter {
-                let distanceToNode = $0.position.distance(to: point)
-                return distanceToNode <= range && distanceToNode != 0
-            }
-    }
-}
-
-extension CGRect {
-    var center: CGPoint {
-        return CGPoint(x: midX,
-                       y: midY)
-    }
-    
-    var radius: CGFloat {
-        return max(width, height)/2
-    }
-}

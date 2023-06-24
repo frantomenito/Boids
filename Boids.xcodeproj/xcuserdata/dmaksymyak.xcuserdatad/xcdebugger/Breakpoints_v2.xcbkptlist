@@ -3,4 +3,54 @@
    uuid = "F8047D4F-433B-4BDC-8947-2456A8EF8F2C"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "AFB7603E-AA23-4131-876D-0177AE20E71F"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Boids/QuadTree.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "156"
+            endingLineNumber = "156"
+            landmarkName = "QuadTree"
+            landmarkType = "3">
+            <Locations>
+               <Location
+                  uuid = "AFB7603E-AA23-4131-876D-0177AE20E71F - ddb32011e4eaad95"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Boids.QuadTree.deinit"
+                  moduleName = "Boids"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/dmaksymyak/Projects/Boids/Boids/QuadTree.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "156"
+                  endingLineNumber = "156"
+                  offsetFromSymbolStart = "8">
+               </Location>
+               <Location
+                  uuid = "AFB7603E-AA23-4131-876D-0177AE20E71F - 340fcde213eedbb2"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Boids.QuadTree.__deallocating_deinit"
+                  moduleName = "Boids"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/dmaksymyak/Projects/Boids/Boids/QuadTree.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "156"
+                  endingLineNumber = "156"
+                  offsetFromSymbolStart = "8">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>

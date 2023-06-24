@@ -46,11 +46,9 @@ class SpatialHashGrid {
                 let gridKey = GridKey(x: x, y: y)
                 if let nodes = grid[gridKey] {
                     for node in nodes {
-                        let dx = node.position.x - point.x
-                        let dy = node.position.y - point.y
-                        let squaredDistance = dx * dx + dy * dy //Using squared distance, to remove division from calculation
+                        let squaredDistance = node.position.squaredDistance(to: point)
                         
-                        if squaredDistance <= minimalDetectionRangeSquared && squaredDistance != 0 {
+                        if squaredDistance <= detectionRangeSquared && squaredDistance != 0{
                             nodesInRange.append(node)
                         }
                     }
@@ -58,6 +56,19 @@ class SpatialHashGrid {
             }
         }
         return nodesInRange
+    }
+    
+    func draw(in scene: SKScene) {        
+        for key in grid.keys {
+            let outlineRect = CGRect(x: CGFloat(key.x) * cellSize,
+                                     y: CGFloat(key.y) * cellSize,
+                                     width: cellSize,
+                                     height: cellSize)
+            let outline = SKShapeNode(rect: outlineRect)
+            outline.strokeColor = .white
+            outline.lineWidth = 1.0
+            scene.addChild(outline)
+        }
     }
     
     func clear() {
