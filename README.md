@@ -12,9 +12,9 @@ As with most artificial life simulations, Boids is an example of emergent behavi
 Common thing that everyone does is checking only for neighbours in front view, but i wanted more FPS. Also, i've added reaction to touch, so boids move from touch position if near
 ## Preview:
 Start of simulation
-<img src="/Artwork/start.gif" width="660">
+<img src="/Artwork/start.mov" width="660">
 Touch reaction
-<img src="/Artwork/touch.gif" width="660">
+<img src="/Artwork/touch.mov" width="660">
 ## Performance:
 On IPad 6th generation it can simulate 4096 nodes in 30 fps. Im using Spatial Hashing algorithm as searching method with Time complexity _O(n\*m\*k)_, where n is number of nodes, m is number of grids to search through and k is number of nodes in one grid cell. Now current bottleneck is calculations and some system proccess(was not able to identify, because Instruments was not able to identify process time). <br/><br/>
 When a lot of boids are in one location, it can have lag spikes, because larger boid density. In theory it can be fixed by limiting boid neighbourhood count, but it was not a big improvement, so i removed neighbourhood cap. <br/><br/>
